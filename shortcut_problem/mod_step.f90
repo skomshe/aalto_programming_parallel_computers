@@ -1,47 +1,61 @@
 
 MODULE mod_step
 
-    USE OMP_LIB
+USE omp_lib
+
+IMPLICIT NONE
+
+CONTAINS
+
+SUBROUTINE step_v0(n,d,r)
 
     IMPLICIT NONE
 
-    CONTAINS
+    INTEGER  (KIND = 4)                     :: n                         
+    REAL     (KIND = 8) , DIMENSION(:,:)    :: r, d 
 
-    SUBROUTINE step_v0(n,d,r)
+    INTEGER  (KIND = 4)                     :: i1, j1, k1
+    REAL     (KIND = 8)                     :: v, z
 
-        IMPLICIT NONE
-
-        INTEGER  (KIND = 4)                  :: n                         
-        REAL     (KIND = 8) , DIMENSION(n,n) :: r, d 
-
-        INTEGER  (KIND = 4)                  :: i1, j1
-
-        DO i1 = 1,n
-            DO j1 = 1,n
-                r(i1,j1) = MINVAL(d(i1,1:n) + d(1:n,j1))
+    DO i1 = 1,n
+        DO j1 = 1,n
+            v = d(i1,1) + d(1,j1)
+            DO k1 = 2,n
+                z = d(i1,k1) + d(k1,j1)
+                v = MIN(v,z)
             END DO
+            r(i1,j1) = v
         END DO
-    
-    END SUBROUTINE step_v0
+    END DO
 
-    SUBROUTINE step_v1(n,d,r)
+END SUBROUTINE step_v0
 
-        IMPLICIT NONE
+SUBROUTINE step_v1(n,d,r)
 
-        INTEGER  (KIND = 4)                  :: n                         
-        REAL     (KIND = 8) , DIMENSION(n,n) :: r, d 
+    IMPLICIT NONE
 
-        INTEGER  (KIND = 4)                  :: i1, j1
-        REAL     (KIND = 8)                  :: tmp
+    INTEGER  (KIND = 4)                     :: n                         
+    REAL     (KIND = 8) , DIMENSION(:,:)    :: r, d 
 
-        DO i1 = 1,n
-            DO j1 = 1,n
-                tmp = MINVAL(d(i1,1:n) + d(1:n,j1))
-                r(i1,j1) = tmp
+    INTEGER  (KIND = 4)                     :: i1, j1, k1
+    REAL     (KIND = 8)                     :: v, z
+
+    !$OMP PARALLEL DO DEFAULT(NONE) &
+    !$OMP PRIVATE(i1,j1,k1,v,z) &
+    !$OMP SHARED(n,r,d)        
+    DO i1 = 1,n
+        DO j1 = 1,n
+            v = d(i1,1) + d(1,j1)
+            DO k1 = 2,n
+                z = d(i1,k1) + d(k1,j1)
+                v = MIN(v,z)
             END DO
+            r(i1,j1) = v
         END DO
-    
-    END SUBROUTINE step_v1
+    END DO
+    !$OMP END PARALLEL DO
+
+END SUBROUTINE step_v1
 
 
 END MODULE mod_step
