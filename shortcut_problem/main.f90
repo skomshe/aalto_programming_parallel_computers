@@ -1,32 +1,36 @@
 
 PROGRAM main
 
-    USE mod_step
-    
-    IMPLICIT NONE
-    
-    INTEGER  (KIND = 4)                                 :: i1, n                          
-    REAL     (KIND = 8)                                 :: st, en
-    REAL     (KIND = 8) , DIMENSION(:,:), ALLOCATABLE   :: r, d 
+USE mod_step
 
-    n = 2000 
-    ALLOCATE(r(n,n))
-    ALLOCATE(d(n,n))
+IMPLICIT NONE
 
-    d = 1.0D0
-    DO i1 = 1,n
-        d(i1,i1) = 0.0D0
-    END DO
+INTEGER  (KIND = 4)                                                         ::&
+  i1, n                          
+REAL     (KIND = 8)                                                         ::&
+  st, en                  
+REAL     (KIND = 8), DIMENSION(:,:), ALLOCATABLE                            ::&
+  r, d 
 
-    st = OMP_GET_WTIME()
+n = 2000 
+ALLOCATE(r(n,n))
+ALLOCATE(d(n,n))
 
-    ! CALL step_v0(n,d,r)
-    CALL step_v1(n,d,r) 
+d = 1.0D0
+DO i1 = 1,n
+    d(i1,i1) = 0.0D0
+END DO
 
-    en = OMP_GET_WTIME()
+st = OMP_GET_WTIME()
 
-    WRITE(*,'(A,E15.4,A)') 'Time = ', en-st, 'seconds'
+! CALL step_v0(n,d,r)
+! CALL step_omp(n,d,r) 
+CALL step_v1(n,d,r) 
 
-    DEALLOCATE(r,d)
+en = OMP_GET_WTIME()
+
+WRITE(*,'(A,E15.4,A)') 'Time = ', en-st, 'seconds'
+
+DEALLOCATE(r,d)
 
 END PROGRAM main
