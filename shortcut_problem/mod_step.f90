@@ -131,11 +131,12 @@ INTEGER  (KIND = 4), DIMENSION(nb)                                          ::&
 REAL     (KIND = 8)                                                         ::&
   tmp
 REAL     (KIND = 8), DIMENSION(nb)                                          ::&
-  tmpA, vv
-REAL     (KIND = 8), DIMENSION(nab,n)                                       ::&
-  d_pad
-REAL     (KIND = 8), DIMENSION(n,nab)                                       ::&
-  t_pad
+  zz, vv
+REAL     (KIND = 8), DIMENSION(:,:), ALLOCATABLE                            ::&
+  d_pad, t_pad
+
+ALLOCATE(d_pad(nab,n))
+ALLOCATE(t_pad(n,nab))
 
 !$OMP PARALLEL DO DEFAULT(NONE) &
 !$OMP PRIVATE(i1,j1,tmp) &
@@ -152,7 +153,7 @@ d_pad(n+1:nab,1:n) = 1.0D5
 t_pad(1:n,n+1:nab) = 1.0D5
 
 !$OMP PARALLEL DO DEFAULT(NONE) &
-!$OMP PRIVATE(i1,j1,k1,idx,idxA,tmpA,vv) &
+!$OMP PRIVATE(i1,j1,k1,idx,idxA,zz,vv) &
 !$OMP SHARED(n,na,nb,r,d_pad,t_pad)        
 DO i1 = 1,n
   DO j1 = 1,n
@@ -170,15 +171,15 @@ DO i1 = 1,n
       idxA(3) = idx + 3
       idxA(4) = idx + 4
 
-      tmpA(1) = t_pad(idxA(1),i1) + d_pad(idxA(1),j1)
-      tmpA(2) = t_pad(idxA(2),i1) + d_pad(idxA(2),j1)
-      tmpA(3) = t_pad(idxA(3),i1) + d_pad(idxA(3),j1)
-      tmpA(4) = t_pad(idxA(4),i1) + d_pad(idxA(4),j1)
+      zz(1) = t_pad(idxA(1),i1) + d_pad(idxA(1),j1)
+      zz(2) = t_pad(idxA(2),i1) + d_pad(idxA(2),j1)
+      zz(3) = t_pad(idxA(3),i1) + d_pad(idxA(3),j1)
+      zz(4) = t_pad(idxA(4),i1) + d_pad(idxA(4),j1)
 
-      vv(1) = MIN(tmpA(1),vv(1))
-      vv(2) = MIN(tmpA(2),vv(2))
-      vv(3) = MIN(tmpA(3),vv(3))
-      vv(4) = MIN(tmpA(4),vv(4))
+      vv(1) = MIN(zz(1),vv(1))
+      vv(2) = MIN(zz(2),vv(2))
+      vv(3) = MIN(zz(3),vv(3))
+      vv(4) = MIN(zz(4),vv(4))
     END DO
 
     r(i1,j1) = MINVAL(vv)
@@ -186,6 +187,8 @@ DO i1 = 1,n
   END DO
 END DO
 !$OMP END PARALLEL DO
+
+DEALLOCATE(d_pad,t_pad)
 
 END SUBROUTINE step_v2
 !------------------------------------------------------------------------------

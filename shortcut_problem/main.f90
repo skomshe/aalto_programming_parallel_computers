@@ -16,7 +16,7 @@ REAL     (KIND = 8), DIMENSION(:,:), ALLOCATABLE                            ::&
 
 PI = 4.0D0*ATAN(1.0D0)
   
-n = 2000
+n = 3000
 ALLOCATE(r(n,n))
 ALLOCATE(d(n,n))
 
