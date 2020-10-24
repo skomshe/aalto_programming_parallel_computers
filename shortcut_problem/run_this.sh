@@ -12,3 +12,4 @@ gfortran -O3 -march=native -fopenmp main.f90 mod_step.o -o main
 echo "Running the executable ..."
 export OMP_NUM_THREADS=2
 ./main
+
