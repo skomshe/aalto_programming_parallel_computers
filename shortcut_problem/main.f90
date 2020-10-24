@@ -32,9 +32,12 @@ st = OMP_GET_WTIME()
 ! CALL step_v0(n,d,r)
 ! CALL step_omp(n,d,r) 
 ! CALL step_v1(n,d,r) 
+! na = (n + nb - 1)/nb
+! nab = na*nb
+! CALL step_v2(n,na,nb,nab,d,r) ! use nb = 4
 na = (n + nb - 1)/nb
 nab = na*nb
-CALL step_v2(n,na,nb,nab,d,r) 
+CALL step_v3(n,na,nb,nab,d,r) ! use nb = 4
 
 en = OMP_GET_WTIME()
 
