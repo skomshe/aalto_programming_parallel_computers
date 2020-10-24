@@ -5,8 +5,10 @@ USE mod_step
 
 IMPLICIT NONE
 
+INTEGER  (KIND = 4), PARAMETER                                              ::&
+  nb = 4
 INTEGER  (KIND = 4)                                                         ::&
-  i1, j1, n                          
+  i1, j1, n, na, nab                          
 REAL     (KIND = 8)                                                         ::&
   PI, st, en                  
 REAL     (KIND = 8), DIMENSION(:,:), ALLOCATABLE                            ::&
@@ -30,7 +32,9 @@ st = OMP_GET_WTIME()
 ! CALL step_v0(n,d,r)
 ! CALL step_omp(n,d,r) 
 ! CALL step_v1(n,d,r) 
-CALL step_v2(n,d,r) 
+na = (n + nb - 1)/nb
+nab = na*nb
+CALL step_v2(n,na,nb,nab,d,r) 
 
 en = OMP_GET_WTIME()
 

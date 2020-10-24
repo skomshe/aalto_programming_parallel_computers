@@ -115,32 +115,28 @@ DEALLOCATE(t)
 END SUBROUTINE step_v1
 !------------------------------------------------------------------------------
 
-SUBROUTINE step_v2(n,d,r)
+SUBROUTINE step_v2(n,na,nb,nab,d,r)
 
 IMPLICIT NONE
 
 INTEGER  (KIND = 4)                                                         ::&
-  n                         
+  n, na, nb, nab
 REAL     (KIND = 8), DIMENSION(:,:)                                         ::&
   r, d 
 
 INTEGER  (KIND = 4)                                                         ::&
-  nb, na, nab, i1, j1, k1, k2, idx, idx1, idx2, idx3, idx4
+  i1, j1, k1, idx
+INTEGER  (KIND = 4), DIMENSION(nb)                                          ::&
+  idxA
 REAL     (KIND = 8)                                                         ::&
-  tmp, tmp1, tmp2, tmp3, tmp4
-REAL     (KIND = 8), DIMENSION(:), ALLOCATABLE                              ::&
-  vv
-REAL     (KIND = 8), DIMENSION(:,:), ALLOCATABLE                            ::&
-  d_pad, t_pad
+  tmp
+REAL     (KIND = 8), DIMENSION(nb)                                          ::&
+  tmpA, vv
+REAL     (KIND = 8), DIMENSION(nab,n)                                       ::&
+  d_pad
+REAL     (KIND = 8), DIMENSION(n,nab)                                       ::&
+  t_pad
 
-nb = 4
-na = (n + nb - 1)/nb
-nab = na*nb
-
-ALLOCATE(vv(nb))
-
-ALLOCATE(d_pad(nab,n))
-ALLOCATE(t_pad(n,nab))
 !$OMP PARALLEL DO DEFAULT(NONE) &
 !$OMP PRIVATE(i1,j1,tmp) &
 !$OMP SHARED(n,d,d_pad,t_pad)   
@@ -156,14 +152,10 @@ d_pad(n+1:nab,1:n) = 1.0D5
 t_pad(1:n,n+1:nab) = 1.0D5
 
 !$OMP PARALLEL DO DEFAULT(NONE) &
-!$OMP PRIVATE(i1,j1,k1,k2,idx,idx1,idx2,idx3,idx4,tmp,tmp1,tmp2,tmp3,tmp4,vv) &
+!$OMP PRIVATE(i1,j1,k1,idx,idxA,tmpA,vv) &
 !$OMP SHARED(n,na,nb,r,d_pad,t_pad)        
 DO i1 = 1,n
   DO j1 = 1,n
-
-    ! DO k1 = 1,nb
-    !   vv(k1) = t_pad(k1,i1) + d_pad(k1,j1)
-    ! END DO
 
     vv(1) = t_pad(1,i1) + d_pad(1,j1)
     vv(2) = t_pad(2,i1) + d_pad(2,j1)
@@ -171,29 +163,22 @@ DO i1 = 1,n
     vv(4) = t_pad(4,i1) + d_pad(4,j1)
 
     DO k1 = 2,na
-      ! DO k2 = 1,nb
-      !   idx = (k1-1)*nb + k2
-      !   tmp = t_pad(idx,i1) + d_pad(idx,j1)
-      !   vv(k2) = MIN(tmp,vv(k2))
-      ! END DO
-
       idx = (k1-1)*nb
 
-      idx1 = idx + 1
-      idx2 = idx + 2
-      idx3 = idx + 3
-      idx4 = idx + 4
+      idxA(1) = idx + 1
+      idxA(2) = idx + 2
+      idxA(3) = idx + 3
+      idxA(4) = idx + 4
 
-      tmp1 = t_pad(idx1,i1) + d_pad(idx1,j1)
-      tmp2 = t_pad(idx2,i1) + d_pad(idx2,j1)
-      tmp3 = t_pad(idx3,i1) + d_pad(idx3,j1)
-      tmp4 = t_pad(idx4,i1) + d_pad(idx4,j1)
+      tmpA(1) = t_pad(idxA(1),i1) + d_pad(idxA(1),j1)
+      tmpA(2) = t_pad(idxA(2),i1) + d_pad(idxA(2),j1)
+      tmpA(3) = t_pad(idxA(3),i1) + d_pad(idxA(3),j1)
+      tmpA(4) = t_pad(idxA(4),i1) + d_pad(idxA(4),j1)
 
-      vv(1) = MIN(tmp1,vv(1))
-      vv(2) = MIN(tmp2,vv(2))
-      vv(3) = MIN(tmp3,vv(3))
-      vv(4) = MIN(tmp4,vv(4))
-
+      vv(1) = MIN(tmpA(1),vv(1))
+      vv(2) = MIN(tmpA(2),vv(2))
+      vv(3) = MIN(tmpA(3),vv(3))
+      vv(4) = MIN(tmpA(4),vv(4))
     END DO
 
     r(i1,j1) = MINVAL(vv)
@@ -201,8 +186,6 @@ DO i1 = 1,n
   END DO
 END DO
 !$OMP END PARALLEL DO
-
-DEALLOCATE(vv,d_pad,t_pad)
 
 END SUBROUTINE step_v2
 !------------------------------------------------------------------------------
