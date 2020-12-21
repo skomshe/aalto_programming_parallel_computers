@@ -6,9 +6,9 @@ USE mod_step
 IMPLICIT NONE
 
 INTEGER  (KIND = 4), PARAMETER                                              ::&
-  nb = 4
+  nb = 4, nd = 3
 INTEGER  (KIND = 4)                                                         ::&
-  i1, j1, n, na, nab                          
+  i1, j1, n, na, nab, nc, ncd              
 REAL     (KIND = 8)                                                         ::&
   PI, st, en                  
 REAL     (KIND = 8), DIMENSION(:,:), ALLOCATABLE                            ::&
@@ -30,14 +30,24 @@ END DO
 st = OMP_GET_WTIME()
 
 ! CALL step_v0(n,d,r)
+
 ! CALL step_omp(n,d,r) 
+
 ! CALL step_v1(n,d,r) 
+
 ! na = (n + nb - 1)/nb
 ! nab = na*nb
 ! CALL step_v2(n,na,nb,nab,d,r) ! use nb = 4
+
+! na = (n + nb - 1)/nb
+! nab = na*nb
+! CALL step_v3(n,na,nb,nab,d,r) ! use nb = 4
+
 na = (n + nb - 1)/nb
 nab = na*nb
-CALL step_v3(n,na,nb,nab,d,r) ! use nb = 4
+nc = (n + nd - 1)/nd
+ncd = nc*nd
+CALL step_v4(n,na,nb,nab,nc,nd,ncd,d,r) ! use nb = 4, nd = 3
 
 en = OMP_GET_WTIME()
 

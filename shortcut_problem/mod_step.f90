@@ -285,4 +285,20 @@ DEALLOCATE(d_pad,t_pad)
 
 END SUBROUTINE step_v3
 
+!------------------------------------------------------------------------------
+
+SUBROUTINE step_v4(n,na,nb,nab,nc,nd,ncd,d,r)
+
+IMPLICIT NONE
+
+INTEGER  (KIND = 4)                                                         ::&
+  n, na, nb, nab, nc, nd, ncd
+REAL     (KIND = 8), DIMENSION(:,:)                                         ::&
+  r, d 
+
+
+END SUBROUTINE step_v4
+
+!------------------------------------------------------------------------------
+
 END MODULE mod_step
